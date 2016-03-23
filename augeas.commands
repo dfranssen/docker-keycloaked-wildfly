@@ -1,0 +1,18 @@
+set /augeas/load/Xml/lens Xml.lns
+set /augeas/load/Xml/incl[2] /opt/jboss/wildfly/standalone/configuration/standalone.xml
+load
+
+defvar extensions "/files/opt/jboss/wildfly/standalone/configuration/standalone.xml/server/extensions"
+set $extensions/extension[last()+1]/#attribute/module "org.keycloak.keycloak-adapter-subsystem"
+
+defvar profile "/files/opt/jboss/wildfly/standalone/configuration/standalone.xml/server/profile"
+set $profile/subsystem[last()+1]/#attribute/xmlns "urn:jboss:domain:keycloak:1.1"
+
+defvar securitydomains "/files/opt/jboss/wildfly/standalone/configuration/standalone.xml/server/profile/subsystem[#attribute/xmlns='urn:jboss:domain:security:1.2']/security-domains"
+set $securitydomains/security-domain[last()+1]/#attribute/name "keycloak"
+set $securitydomains/security-domain[last()]/authentication
+set $securitydomains/security-domain[last()]/authentication/login-module/#attribute/code "org.keycloak.adapters.jboss.KeycloakLoginModule"
+set $securitydomains/security-domain[last()]/authentication/login-module/#attribute/flag "required"
+
+save
+print /augeas//error
